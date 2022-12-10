@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js",
-    "dev": "export NODE_ENV=development && nodemon index.js",
-    "prod": "export NODE_ENV=production && nodemon index.js"
+    "dev": "export NODE_ENV=development && node index.js",
+    "prod": "export NODE_ENV=production && node index.js"
   },
   "repository": {
     "type": "git",
