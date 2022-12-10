@@ -1,7 +1,26 @@
-const httpServer = require('http').createServer();
-const io = require('socket.io')(httpServer, {
+const express = require('express');
+const app = express();
+const http = require('http');
+const path = require('path')
+const config =  require('./config.js');
+const server = http.createServer(app);
+
+// Serve the static files from the React app
+app.use(express.static(path.join(__dirname, 'client/build')));
+
+// Handles any requests that don't match the ones above
+app.get('*', (req,res) =>{
+  res.sendFile(path.join(__dirname+'/client/build/index.html'));
+});
+
+server.listen(config.PORT, config.HOST, () => {
+  console.log(`NODE_ENV=${config.NODE_ENV}`);
+  console.log(`server listening at http://${config.HOST}:${config.PORT}`);
+})
+
+const io = require('socket.io')(server, {
   cors: {
-    origin: 'http://192.168.0.105:3000',
+    origin: `http://${config.HOST}:${config.PORT}`
   },
 });
 
@@ -46,16 +65,6 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('user disconnected ', socket.id);
     console.log('Active sockets ', io.engine.clientsCount);
-    socket.broadcast.emit(
-      'user disconnected',
-      socket.id,
-      socket.userDetails.userName
-    );
+    socket.broadcast.emit('user disconnected', socket.id);
   });
 });
-
-const PORT = process.env.PORT || 4000;
-
-httpServer.listen(PORT, () =>
-  console.log(`server listening at http://localhost:${PORT}`)
-);
