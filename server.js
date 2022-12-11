@@ -21,7 +21,7 @@ server.listen(config.PORT, () => {
 
 const io = require('socket.io')(server, {
   cors: {
-    origin: `http://${config.HOST}:${config.PORT}`
+    origin: [`http://${config.HOST}:${config.PORT}`, 'http://localhost:3000', 'http://192.168.0.105:3000']
   },
 });
 
