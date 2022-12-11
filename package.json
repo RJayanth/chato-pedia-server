@@ -4,9 +4,9 @@
   "description": "Server side implementation",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js",
-    "dev": "export NODE_ENV=development && node index.js",
-    "prod": "export NODE_ENV=production && node index.js"
+    "start": "nodemon server.js",
+    "dev": "export NODE_ENV=development && nodemon server.js",
+    "prod": "export NODE_ENV=production && node server.js"
   },
   "repository": {
     "type": "git",

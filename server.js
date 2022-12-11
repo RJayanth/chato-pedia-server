@@ -13,9 +13,10 @@ app.get('*', (req,res) =>{
   res.sendFile(path.join(__dirname+'/client/build/index.html'));
 });
 
-server.listen(config.PORT, config.HOST, () => {
+server.listen(config.PORT, () => {
   console.log(`NODE_ENV=${config.NODE_ENV}`);
   console.log(`server listening at http://${config.HOST}:${config.PORT}`);
+  // console.log(`server listening at PORT ${config.PORT}`);
 })
 
 const io = require('socket.io')(server, {
