@@ -62,6 +62,11 @@ io.on('connection', (socket) => {
     });
   });
 
+  socket.on('typing', payload => {
+    console.log('typing event recvieved in server', payload)
+    socket.to(payload.sendToId).emit('user typing', {sentFromId: socket.userDetails.id});
+  })
+
   // notify users upon disconnection
   socket.on('disconnect', () => {
     console.log('user disconnected ', socket.id);
