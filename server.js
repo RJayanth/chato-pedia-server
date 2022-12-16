@@ -55,10 +55,10 @@ io.on('connection', (socket) => {
   socket.broadcast.emit('new user', socket.userDetails);
 
   // forward the private message to the right recipient
-  socket.on('private message', ({ content, to }) => {
-    socket.to(to).emit('private message', {
+  socket.on('private message', ({ content, sendToId }) => {
+    socket.to(sendToId).emit('incoming private message', {
       content,
-      from: socket.id,
+      fromId: socket.id,
     });
   });
 
