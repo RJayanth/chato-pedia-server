@@ -1,36 +1,35 @@
 const express = require('express');
 const app = express();
 const http = require('http');
-const path = require('path')
-const config =  require('./config.js');
+const path = require('path');
+const config = require('./config.js');
 const server = http.createServer(app);
 
 // Serve the static files from the React app
 app.use(express.static(path.join(__dirname, 'client/build')));
 
 // Handles any requests that don't match the ones above
-app.get('*', (req,res) =>{
-  res.sendFile(path.join(__dirname+'/client/build/index.html'));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname + '/client/build/index.html'));
 });
 
 server.listen(config.PORT, () => {
   console.log(`NODE_ENV=${config.NODE_ENV}`);
   console.log(`server listening at http://${config.HOST}:${config.PORT}`);
-  // console.log(`server listening at PORT ${config.PORT}`);
-})
+});
 
 const io = require('socket.io')(server, {
+  ...config.SOCKET_CONFIG,
   cors: {
-    origin: [`http://${config.HOST}:${config.PORT}`, 'http://localhost:3000', 'http://192.168.0.105:3000']
+    cors: {
+      origin: config.CLIENT_ORIGIN,
+      methods: ['GET', 'POST'],
+    }
   },
 });
 
 io.use((socket, next) => {
   const userDetails = socket.handshake.auth.userDetails;
-  // console.log('in use handler ', userDetails);
-  // if (userDetails.userName) {
-  //   return next(new Error("invalid userName"));
-  // }
   socket.userDetails = { ...userDetails, id: socket.id };
   next();
 });
@@ -43,13 +42,17 @@ io.on('connection', (socket) => {
 
   // fetch existing users
   let users = [];
-  for (let [id, socket] of io.of('/').sockets) {
-    users.push(socket.userDetails);
+  for (let [id, sckt] of io.of('/').sockets) {
+    console.log('id, socket user Details ---', id, sckt.userDetails);
+    console.log('socket details', socket.userDetails);
+    if (id !== socket.id) {
+      users.push(sckt.userDetails);
+    }
   }
 
   // send total users list to the newly connected user
   console.log('usersList ', users);
-  socket.emit('users list', users);
+  socket.emit('initial users list', users);
 
   // notify existing users about new user
   socket.broadcast.emit('new user', socket.userDetails);
@@ -62,10 +65,12 @@ io.on('connection', (socket) => {
     });
   });
 
-  socket.on('typing', payload => {
-    console.log('typing event recvieved in server', payload)
-    socket.to(payload.sendToId).emit('user typing', {sentFromId: socket.userDetails.id});
-  })
+  socket.on('typing', (payload) => {
+    console.log('typing event recvieved in server', payload);
+    socket
+      .to(payload.sendToId)
+      .emit('user typing', { sentFromId: socket.userDetails.id });
+  });
 
   // notify users upon disconnection
   socket.on('disconnect', () => {
