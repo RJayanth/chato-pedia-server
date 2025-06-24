@@ -1,18 +1,20 @@
 const dotenv = require('dotenv');
 const path = require('path');
 
-dotenv.config({
-  path: path.resolve(__dirname, `${process.env.NODE_ENV}.env`),
-});
+// Load the correct .env.* file
+const NODE_ENV = process.env.NODE_ENV || 'development';
+dotenv.config({ path: path.resolve(__dirname, `.env.${NODE_ENV}`) });
+// Also load .env (base config) in all environments
+dotenv.config({ path: path.resolve(__dirname, `.env`) });
 
 module.exports = {
-  NODE_ENV: process.env.NODE_ENV || 'development',
-  HOST: process.env.HOST || '192.168.31.126',
+  NODE_ENV,
+  HOST: process.env.HOST || '0.0.0.0',
   PORT: process.env.PORT || 3001,
   CLIENT_ORIGIN: process.env.CLIENT_ORIGIN,
   SOCKET_CONFIG: {
-    transports: ['websocket'], // force websocket for better stability
-    pingInterval: 25000, // how often the server sends a ping (default is 25000ms)
-    pingTimeout: 120000, // how long to wait for pong before disconnect (increase this 2 mins)
+    transports: ['websocket'],
+    pingInterval: 25000,
+    pingTimeout: 120000,
   }
 };

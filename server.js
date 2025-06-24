@@ -9,9 +9,20 @@ const server = http.createServer(app);
 app.use(express.static(path.join(__dirname, 'client/build')));
 
 // Handles any requests that don't match the ones above
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname + '/client/build/index.html'));
-});
+if (config.NODE_ENV === 'production') {
+  // Serve static files from the React app
+  app.use(express.static(path.join(__dirname, 'client/build')));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'client/build/index.html'));
+  });
+} else {
+  // In development, just serve backend routes; React runs separately on 3000
+  app.get('/', (req, res) => {
+    res.send('API server running...');
+  });
+}
+
 
 server.listen(config.PORT, () => {
   console.log(`NODE_ENV=${config.NODE_ENV}`);
